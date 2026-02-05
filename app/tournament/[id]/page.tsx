@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
 import { TournamentBracket } from './tournament-bracket';
+import { getEffectiveBracketSize, getTotalRounds } from '@/lib/bracket-utils';
 import type { MatchWithPlayers, Participant, Match, Tournament } from '@/lib/supabase/types';
 
 export const dynamic = 'force-dynamic';
@@ -61,8 +62,11 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
     winner: match.winner_id ? participantsMap.get(match.winner_id) || null : null,
   }));
 
+  // Calculate effective bracket size (next power of 2)
+  const effectiveBracketSize = getEffectiveBracketSize(tournament.bracket_size);
+  const totalRounds = getTotalRounds(tournament.bracket_size);
+  
   // Find the champion (winner of the final match)
-  const totalRounds = Math.log2(tournament.bracket_size);
   const finalMatch = enrichedMatches.find(m => m.round === totalRounds);
   const champion: Participant | null = finalMatch?.winner || null;
 
@@ -92,7 +96,8 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
         <TournamentBracket
           tournamentId={tournament.id}
           initialMatches={enrichedMatches}
-          bracketSize={tournament.bracket_size}
+          bracketSize={effectiveBracketSize}
+          participantCount={tournament.bracket_size}
           champion={champion}
         />
       </div>

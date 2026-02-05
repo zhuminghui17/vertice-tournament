@@ -5,8 +5,8 @@ CREATE TABLE tournaments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   game_name TEXT NOT NULL,
-  bracket_size INTEGER NOT NULL CHECK (bracket_size IN (4, 8, 16, 32, 64)),
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed')),
+  bracket_size INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

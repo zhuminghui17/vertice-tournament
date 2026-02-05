@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/lib/supabase/client';
-import { createInitialMatches, isValidBracketSize } from '@/lib/bracket-utils';
+import { createInitialMatches, isValidParticipantCount, getByeCount, getNextPowerOf2 } from '@/lib/bracket-utils';
 
 export function TournamentForm() {
   const router = useRouter();
@@ -37,10 +37,8 @@ export function TournamentForm() {
     if (!gameName.trim()) return 'Game name is required';
     
     const filledParticipants = participants.filter(p => p.trim());
-    if (filledParticipants.length < 2) return 'At least 2 participants are required';
-    
-    if (!isValidBracketSize(filledParticipants.length)) {
-      return `Number of participants must be a power of 2 (2, 4, 8, 16, 32, etc.). You have ${filledParticipants.length}.`;
+    if (!isValidParticipantCount(filledParticipants.length)) {
+      return 'At least 2 participants are required';
     }
     
     const uniqueNames = new Set(filledParticipants.map(p => p.trim().toLowerCase()));
@@ -118,15 +116,15 @@ export function TournamentForm() {
   };
 
   const filledCount = participants.filter(p => p.trim()).length;
-  const nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(Math.max(filledCount, 2))));
-  const needMore = nextPowerOf2 - filledCount;
+  const byeCount = filledCount >= 2 ? getByeCount(filledCount) : 0;
+  const effectiveBracketSize = filledCount >= 2 ? getNextPowerOf2(filledCount) : 0;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Create Tournament</CardTitle>
         <CardDescription>
-          Set up a new tournament bracket. Number of participants must be a power of 2.
+          Set up a new tournament bracket. Top seeds get byes if player count isn&apos;t a power of 2.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -154,9 +152,9 @@ export function TournamentForm() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Participants ({filledCount})</Label>
-              {filledCount > 0 && !isValidBracketSize(filledCount) && (
+              {filledCount >= 2 && byeCount > 0 && (
                 <span className="text-sm text-muted-foreground">
-                  Add {needMore} more for a valid bracket
+                  {byeCount} bye{byeCount > 1 ? 's' : ''} (top seed{byeCount > 1 ? 's' : ''} skip round 1)
                 </span>
               )}
             </div>

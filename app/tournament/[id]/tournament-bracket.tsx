@@ -11,6 +11,7 @@ interface TournamentBracketProps {
   tournamentId: string;
   initialMatches: MatchWithPlayers[];
   bracketSize: number;
+  participantCount: number;
   champion: Participant | null;
 }
 
@@ -18,6 +19,7 @@ export function TournamentBracket({
   tournamentId,
   initialMatches,
   bracketSize,
+  participantCount,
   champion: initialChampion,
 }: TournamentBracketProps) {
   const [matches, setMatches] = useState<MatchWithPlayers[]>(initialMatches);
@@ -57,11 +59,11 @@ export function TournamentBracket({
       setMatches(enrichedMatches);
 
       // Check for champion
-      const totalRounds = getTotalRounds(bracketSize);
+      const totalRounds = getTotalRounds(participantCount);
       const finalMatch = enrichedMatches.find(m => m.round === totalRounds);
       setChampion(finalMatch?.winner || null);
     }
-  }, [tournamentId, bracketSize]);
+  }, [tournamentId, participantCount]);
 
   // Set up real-time subscription
   useEffect(() => {
@@ -119,7 +121,7 @@ export function TournamentBracket({
     }
 
     // Advance winner to next match (if not the final)
-    const totalRounds = getTotalRounds(bracketSize);
+    const totalRounds = getTotalRounds(participantCount);
     if (match.round < totalRounds) {
       const { round: nextRound, position: nextPosition, slot } = getNextMatchPosition(
         match.round,
