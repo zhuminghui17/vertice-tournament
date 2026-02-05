@@ -140,7 +140,6 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
           bracketSize={effectiveBracketSize}
           participantCount={tournament.bracket_size}
           champion={champion}
-          isCompleted={tournament.status === 'completed'}
         />
         </div>
 
