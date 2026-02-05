@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,8 +12,36 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import type { MatchWithPlayers } from '@/lib/supabase/types';
+
+// Confetti celebration effect
+function triggerConfetti() {
+  // First burst
+  confetti({
+    particleCount: 80,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#6366f1', '#8b5cf6', '#a855f7', '#22c55e', '#eab308'],
+  });
+  
+  // Second burst with slight delay
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: ['#6366f1', '#8b5cf6', '#a855f7'],
+    });
+    confetti({
+      particleCount: 50,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: ['#22c55e', '#eab308', '#f97316'],
+    });
+  }, 150);
+}
 
 interface ScoreDialogProps {
   match: MatchWithPlayers | null;
@@ -54,6 +83,10 @@ export function ScoreDialog({ match, open, onOpenChange, onSubmit }: ScoreDialog
 
     try {
       await onSubmit(match.id, score1, score2);
+      
+      // Trigger confetti celebration!
+      triggerConfetti();
+      
       setPlayer1Score('');
       setPlayer2Score('');
       onOpenChange(false);
