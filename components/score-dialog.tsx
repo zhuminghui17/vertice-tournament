@@ -57,7 +57,7 @@ export function ScoreDialog({ match, open, onOpenChange, onSubmit }: ScoreDialog
       setPlayer1Score('');
       setPlayer2Score('');
       onOpenChange(false);
-    } catch (err) {
+    } catch {
       setError('Failed to update score. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -77,60 +77,80 @@ export function ScoreDialog({ match, open, onOpenChange, onSubmit }: ScoreDialog
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Enter Match Score</DialogTitle>
+          <DialogTitle className="text-xl">Enter Match Score</DialogTitle>
           <DialogDescription>
-            Enter the final scores for this match. The player with the higher score will advance.
+            Enter the final scores. The winner will automatically advance to the next round.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="player1-score" className="text-right col-span-2">
-                <span className="text-xs text-muted-foreground mr-1">
-                  ({match.player1?.seed})
-                </span>
-                {match.player1?.name}
-              </Label>
+          <div className="py-6 space-y-4">
+            {/* Player 1 */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium shrink-0">
+                  {match.player1?.seed}
+                </div>
+                <span className="font-medium truncate">{match.player1?.name}</span>
+              </div>
               <Input
-                id="player1-score"
                 type="number"
                 min="0"
                 value={player1Score}
                 onChange={(e) => setPlayer1Score(e.target.value)}
-                className="col-span-2"
-                placeholder="Score"
+                className="w-24 h-12 text-center text-lg font-mono font-semibold"
+                placeholder="0"
                 autoFocus
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="player2-score" className="text-right col-span-2">
-                <span className="text-xs text-muted-foreground mr-1">
-                  ({match.player2?.seed})
-                </span>
-                {match.player2?.name}
-              </Label>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">vs</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            
+            {/* Player 2 */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium shrink-0">
+                  {match.player2?.seed}
+                </div>
+                <span className="font-medium truncate">{match.player2?.name}</span>
+              </div>
               <Input
-                id="player2-score"
                 type="number"
                 min="0"
                 value={player2Score}
                 onChange={(e) => setPlayer2Score(e.target.value)}
-                className="col-span-2"
-                placeholder="Score"
+                className="w-24 h-12 text-center text-lg font-mono font-semibold"
+                placeholder="0"
               />
             </div>
+
             {error && (
-              <p className="text-sm text-destructive text-center">{error}</p>
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3">
+                <p className="text-sm text-destructive text-center">{error}</p>
+              </div>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Score'}
+            <Button type="submit" disabled={isSubmitting} className="min-w-[120px]">
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Saving...
+                </span>
+              ) : (
+                'Save Score'
+              )}
             </Button>
           </DialogFooter>
         </form>
