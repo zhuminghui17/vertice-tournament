@@ -3,7 +3,7 @@ export type Tournament = {
   name: string;
   game_name: string;
   bracket_size: number;
-  status: 'active' | 'completed';
+  status: 'draft' | 'active' | 'completed';
   created_at: string;
 };
 

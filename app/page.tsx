@@ -31,13 +31,9 @@ export default async function HomePage() {
               </span>
               Tournament Manager
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-10">
               <span className="gradient-text">Vertice</span> Tournament
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 leading-relaxed">
-              Create and manage beautiful tournament brackets for your offsite events. 
-              Support for any number of players with automatic seeding.
-            </p>
             <Link href="/create">
               <Button size="lg" className="px-8 py-6 text-lg font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all">
                 Create Tournament
@@ -113,62 +109,71 @@ export default async function HomePage() {
 
           {!error && tournaments && tournaments.length > 0 && (
             <div className="grid gap-4">
-              {tournaments.map((tournament) => (
-                <Link key={tournament.id} href={`/tournament/${tournament.id}`}>
-                  <Card className="card-hover group cursor-pointer border-border/50 hover:border-primary/30">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-xl group-hover:text-primary transition-colors truncate">
-                            {tournament.name}
-                          </CardTitle>
-                          <CardDescription className="mt-1.5 flex items-center gap-3">
-                            <span className="inline-flex items-center gap-1.5">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              {tournament.game_name}
-                            </span>
-                            <span className="inline-flex items-center gap-1.5">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                              </svg>
-                              {tournament.bracket_size} players
-                            </span>
-                          </CardDescription>
+              {tournaments.map((tournament) => {
+                const href = tournament.status === 'draft' 
+                  ? `/join/${tournament.id}` 
+                  : `/tournament/${tournament.id}`;
+                
+                return (
+                  <Link key={tournament.id} href={href}>
+                    <Card className="card-hover group cursor-pointer border-border/50 hover:border-primary/30">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-xl group-hover:text-primary transition-colors truncate">
+                              {tournament.name}
+                            </CardTitle>
+                            <CardDescription className="mt-1.5 flex items-center gap-3">
+                              <span className="inline-flex items-center gap-1.5">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {tournament.game_name}
+                              </span>
+                              <span className="inline-flex items-center gap-1.5">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                {tournament.status === 'draft' ? 'Waiting for players' : `${tournament.bracket_size} players`}
+                              </span>
+                            </CardDescription>
+                          </div>
+                          <Badge 
+                            variant={tournament.status === 'completed' ? 'default' : 'secondary'}
+                            className={
+                              tournament.status === 'completed' 
+                                ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20' 
+                                : tournament.status === 'draft'
+                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                : 'bg-primary/10 text-primary border-primary/20'
+                            }
+                          >
+                            {tournament.status === 'completed' ? 'Completed' : tournament.status === 'draft' ? 'Draft' : 'In Progress'}
+                          </Badge>
                         </div>
-                        <Badge 
-                          variant={tournament.status === 'completed' ? 'default' : 'secondary'}
-                          className={tournament.status === 'completed' 
-                            ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20' 
-                            : 'bg-primary/10 text-primary border-primary/20'
-                          }
-                        >
-                          {tournament.status === 'completed' ? 'Completed' : 'In Progress'}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
-                          Created {new Date(tournament.created_at).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                          View bracket
-                          <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-muted-foreground">
+                            Created {new Date(tournament.created_at).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </p>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                            {tournament.status === 'draft' ? 'Join tournament' : 'View bracket'}
+                            <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
