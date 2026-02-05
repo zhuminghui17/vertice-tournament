@@ -158,11 +158,37 @@ export function getRoundName(round: number, totalRounds: number): string {
   
   switch (roundsFromEnd) {
     case 0:
-      return 'Championship';
+      return 'Final';
     case 1:
       return 'Semifinals';
     case 2:
       return 'Quarterfinals';
+    case 3:
+      return 'Round of 16';
+    case 4:
+      return 'Round of 32';
+    default:
+      return `Round ${round}`;
+  }
+}
+
+/**
+ * Gets the round name for a side bracket (before the championship)
+ */
+export function getSideRoundName(round: number, totalRoundsInSide: number, side: 'left' | 'right'): string {
+  if (round === totalRoundsInSide) {
+    return 'Semifinal';
+  }
+  
+  const roundsFromSemis = totalRoundsInSide - round;
+  
+  switch (roundsFromSemis) {
+    case 1:
+      return 'Quarterfinal';
+    case 2:
+      return 'Round of 16';
+    case 3:
+      return 'Round of 32';
     default:
       return `Round ${round}`;
   }

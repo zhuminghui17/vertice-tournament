@@ -170,10 +170,6 @@ export function TournamentBracket({
         onOpenChange={setDialogOpen}
         onSubmit={handleScoreSubmit}
       />
-
-      <div className="mt-8 text-center text-sm text-muted-foreground">
-        Click on a match to enter scores. The winner will automatically advance to the next round.
-      </div>
     </>
   );
 }
