@@ -71,11 +71,6 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
   const finalMatch = enrichedMatches.find(m => m.round === totalRounds);
   const champion: Participant | null = finalMatch?.winner || null;
 
-  // Calculate progress
-  const completedMatches = enrichedMatches.filter(m => m.winner_id !== null).length;
-  const totalMatches = enrichedMatches.length;
-  const progressPercent = totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0;
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="container mx-auto px-4 py-8">
@@ -134,34 +129,19 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                 )}
               </div>
             </div>
-
-            {/* Progress indicator */}
-            {tournament.status !== 'completed' && (
-              <div className="flex items-center gap-4 bg-card border border-border/50 rounded-xl px-5 py-3">
-                <div className="text-right">
-                  <p className="text-2xl font-bold">{progressPercent}%</p>
-                  <p className="text-xs text-muted-foreground">Complete</p>
-                </div>
-                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary rounded-full transition-all duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Bracket */}
         <div className="bg-card/50 border border-border/50 rounded-2xl p-2 md:p-4">
-          <TournamentBracket
-            tournamentId={tournament.id}
-            initialMatches={enrichedMatches}
-            bracketSize={effectiveBracketSize}
-            participantCount={tournament.bracket_size}
-            champion={champion}
-          />
+        <TournamentBracket
+          tournamentId={tournament.id}
+          initialMatches={enrichedMatches}
+          bracketSize={effectiveBracketSize}
+          participantCount={tournament.bracket_size}
+          champion={champion}
+          isCompleted={tournament.status === 'completed'}
+        />
         </div>
 
         {/* Help text */}

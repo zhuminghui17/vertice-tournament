@@ -13,6 +13,7 @@ interface TournamentBracketProps {
   bracketSize: number;
   participantCount: number;
   champion: Participant | null;
+  isCompleted: boolean;
 }
 
 export function TournamentBracket({
@@ -21,11 +22,18 @@ export function TournamentBracket({
   bracketSize,
   participantCount,
   champion: initialChampion,
+  isCompleted: initialIsCompleted,
 }: TournamentBracketProps) {
   const [matches, setMatches] = useState<MatchWithPlayers[]>(initialMatches);
   const [selectedMatch, setSelectedMatch] = useState<MatchWithPlayers | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [champion, setChampion] = useState<Participant | null>(initialChampion);
+  const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
+
+  // Calculate progress
+  const completedMatches = matches.filter(m => m.winner_id !== null).length;
+  const totalMatches = matches.length;
+  const progressPercent = totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0;
 
   // Refresh matches data
   const refreshMatches = useCallback(async () => {
@@ -62,6 +70,10 @@ export function TournamentBracket({
       const totalRounds = getTotalRounds(participantCount);
       const finalMatch = enrichedMatches.find(m => m.round === totalRounds);
       setChampion(finalMatch?.winner || null);
+      
+      // Check if completed
+      const allMatchesComplete = enrichedMatches.every(m => m.winner_id !== null);
+      setIsCompleted(allMatchesComplete);
     }
   }, [tournamentId, participantCount]);
 
@@ -157,6 +169,24 @@ export function TournamentBracket({
 
   return (
     <>
+      {/* Progress indicator */}
+      {!isCompleted && (
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center gap-4 bg-card border border-border/50 rounded-xl px-5 py-3">
+            <div className="text-right">
+              <p className="text-2xl font-bold">{progressPercent}%</p>
+              <p className="text-xs text-muted-foreground">Complete</p>
+            </div>
+            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Bracket
         matches={matches}
         bracketSize={bracketSize}
