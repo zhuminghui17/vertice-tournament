@@ -20,7 +20,7 @@ export function getByeCount(participantCount: number): number {
 /**
  * Generates NCAA-style seeding order for a bracket with potential byes
  * Returns matchups where null indicates a bye (no opponent)
- * Top seeds get byes when needed
+ * Top seeds get byes when needed, distributed evenly across bracket halves
  */
 export function generateSeedingOrder(bracketSize: number, participantCount: number): (number | null)[][] {
   if (bracketSize === 2) {
@@ -30,36 +30,34 @@ export function generateSeedingOrder(bracketSize: number, participantCount: numb
     return [[0, 1]];
   }
 
-  // Standard bracket seeding pattern
-  function getMatchups(seeds: (number | null)[]): (number | null)[][] {
-    if (seeds.length === 2) {
-      return [[seeds[0], seeds[1]]];
+  // Generate standard NCAA bracket positions for the given bracket size
+  // This creates the classic 1v16, 8v9, 5v12, 4v13, etc. matchups
+  function generateBracketPositions(size: number): number[] {
+    if (size === 2) return [0, 1];
+    
+    const smaller = generateBracketPositions(size / 2);
+    const result: number[] = [];
+    
+    for (const seed of smaller) {
+      result.push(seed);
+      result.push(size - 1 - seed);
     }
     
-    const half = seeds.length / 2;
-    const top: (number | null)[] = [];
-    const bottom: (number | null)[] = [];
-    
-    // Split seeds so that top seed plays bottom seed, etc.
-    for (let i = 0; i < half; i++) {
-      if (i % 2 === 0) {
-        top.push(seeds[i]);
-        bottom.push(seeds[seeds.length - 1 - i]);
-      } else {
-        top.push(seeds[seeds.length - 1 - i]);
-        bottom.push(seeds[i]);
-      }
-    }
-    
-    return [...getMatchups(top), ...getMatchups(bottom)];
+    return result;
   }
   
-  // Create seed array where indices >= participantCount are byes (null)
-  const seeds: (number | null)[] = Array.from({ length: bracketSize }, (_, i) => 
-    i < participantCount ? i : null
-  );
+  const positions = generateBracketPositions(bracketSize);
   
-  return getMatchups(seeds);
+  // Create matchups from positions, pairing every 2 positions
+  // Positions >= participantCount become byes (null)
+  const matchups: (number | null)[][] = [];
+  for (let i = 0; i < positions.length; i += 2) {
+    const seed1 = positions[i] < participantCount ? positions[i] : null;
+    const seed2 = positions[i + 1] < participantCount ? positions[i + 1] : null;
+    matchups.push([seed1, seed2]);
+  }
+  
+  return matchups;
 }
 
 /**

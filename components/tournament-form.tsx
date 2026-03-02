@@ -126,6 +126,13 @@ export function TournamentForm() {
       const supabase = createClient();
       const filledParticipants = participants.filter(p => p.trim());
       
+      // Randomize participant order - Fisher-Yates shuffle
+      const shuffledNames = [...filledParticipants];
+      for (let i = shuffledNames.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
+      }
+      
       // Create tournament
       const { data: tournament, error: tournamentError } = await supabase
         .from('tournaments')
@@ -140,8 +147,8 @@ export function TournamentForm() {
 
       if (tournamentError) throw tournamentError;
 
-      // Create participants with seeds
-      const participantData = filledParticipants.map((pName, index) => ({
+      // Create participants with randomized seeds
+      const participantData = shuffledNames.map((pName, index) => ({
         tournament_id: tournament.id,
         name: pName.trim(),
         seed: index + 1,
@@ -154,7 +161,7 @@ export function TournamentForm() {
 
       if (participantsError) throw participantsError;
 
-      // Create initial matches
+      // Create initial matches with randomized seeds
       const matchesData = createInitialMatches(
         tournament.id,
         createdParticipants.map(p => ({ id: p.id, seed: p.seed }))

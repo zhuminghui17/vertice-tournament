@@ -16,25 +16,23 @@ import type { MatchWithPlayers } from '@/lib/supabase/types';
 
 // Confetti celebration effect
 function triggerConfetti() {
-  // First burst
   confetti({
-    particleCount: 80,
-    spread: 70,
+    particleCount: 100,
+    spread: 80,
     origin: { y: 0.6 },
     colors: ['#6366f1', '#8b5cf6', '#a855f7', '#22c55e', '#eab308'],
   });
   
-  // Second burst with slight delay
   setTimeout(() => {
     confetti({
-      particleCount: 50,
+      particleCount: 60,
       angle: 60,
       spread: 55,
       origin: { x: 0 },
       colors: ['#6366f1', '#8b5cf6', '#a855f7'],
     });
     confetti({
-      particleCount: 50,
+      particleCount: 60,
       angle: 120,
       spread: 55,
       origin: { x: 1 },
@@ -83,10 +81,7 @@ export function ScoreDialog({ match, open, onOpenChange, onSubmit }: ScoreDialog
 
     try {
       await onSubmit(match.id, score1, score2);
-      
-      // Trigger confetti celebration!
       triggerConfetti();
-      
       setPlayer1Score('');
       setPlayer2Score('');
       onOpenChange(false);
@@ -108,6 +103,12 @@ export function ScoreDialog({ match, open, onOpenChange, onSubmit }: ScoreDialog
 
   if (!match) return null;
 
+  // Determine winner for preview
+  const s1 = parseInt(player1Score, 10);
+  const s2 = parseInt(player2Score, 10);
+  const hasValidScores = !isNaN(s1) && !isNaN(s2) && s1 !== s2 && s1 >= 0 && s2 >= 0;
+  const previewWinner = hasValidScores ? (s1 > s2 ? 1 : 2) : null;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -122,17 +123,26 @@ export function ScoreDialog({ match, open, onOpenChange, onSubmit }: ScoreDialog
             {/* Player 1 */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium shrink-0">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
+                  previewWinner === 1 
+                    ? 'bg-green-500/20 text-green-600 dark:text-green-400' 
+                    : 'bg-muted text-muted-foreground'
+                }`}>
                   {match.player1?.seed}
                 </div>
-                <span className="font-medium truncate">{match.player1?.name}</span>
+                <span className={`font-semibold truncate ${previewWinner === 1 ? 'text-green-600 dark:text-green-400' : ''}`}>
+                  {match.player1?.name}
+                </span>
+                {previewWinner === 1 && <span className="text-green-500">🏆</span>}
               </div>
               <Input
                 type="number"
                 min="0"
                 value={player1Score}
                 onChange={(e) => setPlayer1Score(e.target.value)}
-                className="w-24 h-12 text-center text-lg font-mono font-semibold"
+                className={`w-20 h-12 text-center text-xl font-mono font-bold border-2 transition-colors ${
+                  previewWinner === 1 ? 'border-green-500 bg-green-500/10' : ''
+                }`}
                 placeholder="0"
                 autoFocus
               />
@@ -140,31 +150,40 @@ export function ScoreDialog({ match, open, onOpenChange, onSubmit }: ScoreDialog
             
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-border" />
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">vs</span>
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">vs</span>
               <div className="flex-1 h-px bg-border" />
             </div>
             
             {/* Player 2 */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium shrink-0">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
+                  previewWinner === 2 
+                    ? 'bg-green-500/20 text-green-600 dark:text-green-400' 
+                    : 'bg-muted text-muted-foreground'
+                }`}>
                   {match.player2?.seed}
                 </div>
-                <span className="font-medium truncate">{match.player2?.name}</span>
+                <span className={`font-semibold truncate ${previewWinner === 2 ? 'text-green-600 dark:text-green-400' : ''}`}>
+                  {match.player2?.name}
+                </span>
+                {previewWinner === 2 && <span className="text-green-500">🏆</span>}
               </div>
               <Input
                 type="number"
                 min="0"
                 value={player2Score}
                 onChange={(e) => setPlayer2Score(e.target.value)}
-                className="w-24 h-12 text-center text-lg font-mono font-semibold"
+                className={`w-20 h-12 text-center text-xl font-mono font-bold border-2 transition-colors ${
+                  previewWinner === 2 ? 'border-green-500 bg-green-500/10' : ''
+                }`}
                 placeholder="0"
               />
             </div>
 
             {error && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3">
-                <p className="text-sm text-destructive text-center">{error}</p>
+              <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3">
+                <p className="text-sm text-destructive text-center font-medium">{error}</p>
               </div>
             )}
           </div>
